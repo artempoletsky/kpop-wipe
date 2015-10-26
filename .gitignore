@@ -1,0 +1,8 @@
+/locales/*
+/node_modules/*
+/.idea/*
+/files/*
+*.dll
+*.exe
+*.pak
+*.dat
