@@ -169,8 +169,8 @@ ViewModel.create({
         var data = self.$form.serialize();
         data.board = 'kpop';
         data.thread = '14395';
-        data.comment = 'test';
-        API.postInThread(data, API.chooseFiles(2, 'default'), function (data) {
+        data.comment = '';
+        API.postInThread(data, API.chooseFiles(1, 'default'), function (data) {
             self.log('Post end: ' + data);
             //self.posted.push(thread);
             //fs.writeFileSync('./posted.json', JSON.stringify(self.posted));
