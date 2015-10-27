@@ -22,7 +22,8 @@ ViewModel.create({
         $file: '.file_input'
     },
     events: {
-        'click .send': 'send'
+        'click .send': 'send',
+        'click #log a': 'openLink'
     },
 
     send: function (e) {
@@ -41,7 +42,15 @@ ViewModel.create({
                 var data = self.$form.serialize();
                 data.board = 'b';
                 data.thread = thread;
-                API.postInThread(data, API.chooseFiles(1, subfolder));
+
+                self.log('post start:');
+                var threadURL = 'https://2ch.hk/' + data.board + '/res/' + thread + '.html';
+                self.log('<a href="'+threadURL+'">'+threadURL+'</a>');
+                API.postInThread(data, API.chooseFiles(1, subfolder), function (data) {
+                    self.posted.push(thread);
+                    fs.writeFileSync('./posted.json', JSON.stringify(self.posted));
+                    self.log('Post end: ' + data);
+                });//*/
             });
         };
 
@@ -87,6 +96,10 @@ ViewModel.create({
         var subj = op.comment;
         if (this.webmRegex.test(subj)) {
 
+            if(op.closed){
+                return false;
+            }
+
             if (this.webmRegexExclude.test(subj)) {
 
                 return false;
@@ -126,7 +139,7 @@ ViewModel.create({
 
     openLink: function (e) {
         e.preventDefault();
-        gui.Shell.openExternal(this.link);
+        gui.Shell.openExternal($(e.currentTarget).attr('href'));
     },
 
     getCaptcha: function (callback) {
@@ -142,13 +155,13 @@ ViewModel.create({
         });
     },
     log: function (text) {
-        this.$log.val(this.$log.val() + text + '\n');
+        this.$log.append('<div>' + text + '</div>');
     },
 
     initialize: function () {
         var self = this;
         self.getCaptcha(function () {
-            //self.watchBoard();
+            self.watchBoard();
         });
 
         this.posted = JSON.parse(fs.readFileSync('./posted.json', 'utf-8'));
@@ -164,16 +177,6 @@ ViewModel.create({
 
         tray.on('click', function () {
             win.show();
-        });
-
-        var data = self.$form.serialize();
-        data.board = 'kpop';
-        data.thread = '14395';
-        data.comment = '';
-        API.postInThread(data, API.chooseFiles(1, 'default'), function (data) {
-            self.log('Post end: ' + data);
-            //self.posted.push(thread);
-            //fs.writeFileSync('./posted.json', JSON.stringify(self.posted));
         });
     }
 });
